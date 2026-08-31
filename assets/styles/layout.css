@@ -1,15 +1,9 @@
-/* =========================================================================
-   layout.css — shell da aplicacao, navegacao, telas e responsividade
-   ========================================================================= */
-
-/* ---------- Shell ---------- */
 .app-shell {
   display: grid;
   grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
   min-height: 100vh;
 }
 
-/* ---------- Sidebar ---------- */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -79,7 +73,6 @@
 
 .sidebar-footer { margin-top: auto; padding-top: 16px; }
 
-/* ---------- Topbar ---------- */
 .topbar {
   position: sticky; top: 0; z-index: 30;
   display: flex; align-items: center; gap: 12px;
@@ -95,7 +88,6 @@
 
 .menu-toggle { display: none; }
 
-/* ---------- Area principal ---------- */
 .main { display: flex; flex-direction: column; min-width: 0; }
 
 .page {
@@ -108,7 +100,6 @@
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .page-head p { color: var(--text-muted); font-size: .8125rem; margin-top: 3px; }
 
-/* Barra de filtros / toolbar */
 .toolbar {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   padding: 12px 14px;
@@ -120,7 +111,6 @@
 .toolbar .field { flex: 1 1 180px; }
 .toolbar .toolbar-end { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
-/* ---------- KPIs ---------- */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -157,7 +147,6 @@
 .kpi-value small { font-size: .95rem; font-weight: 600; color: var(--text-muted); }
 .kpi-foot { font-size: .72rem; color: var(--text-faint); }
 
-/* ---------- Grade de chamada ---------- */
 .attendance-summary {
   display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
   padding: 12px 16px;
@@ -204,7 +193,6 @@
 .roster-meta { font-size: .72rem; color: var(--text-faint); display: flex; align-items: center; gap: 6px; }
 .roster-controls { display: flex; align-items: center; gap: 8px; }
 
-/* Segmented control P / F / J */
 .status-group {
   display: inline-flex;
   padding: 3px;
@@ -226,7 +214,6 @@
 .status-btn:hover { color: var(--text); background: var(--surface-hover); }
 .status-btn:active { transform: scale(.93); }
 
-/* Microinteracao: o estado selecionado "pulsa" uma vez ao ser marcado */
 .status-btn[aria-pressed="true"] { animation: status-pop var(--dur) var(--ease); }
 @keyframes status-pop {
   0%   { transform: scale(.86); }
@@ -240,7 +227,6 @@
 .note-btn { color: var(--text-faint); }
 .note-btn[data-has-note="true"] { color: var(--accent); background: var(--accent-soft); }
 
-/* Barra fixa de gravacao */
 .save-bar {
   position: sticky; bottom: 0; z-index: 20;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -252,7 +238,6 @@
 }
 .save-bar .save-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
-/* ---------- Horarios (grade semanal) ---------- */
 .week-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -290,7 +275,6 @@
 .slot .slot-sub { font-size: .7rem; color: var(--text-faint); }
 .slot .slot-actions { display: flex; gap: 2px; margin-top: 4px; }
 
-/* ---------- Graficos leves (barras CSS) ---------- */
 .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 150px; padding-top: 8px; }
 .bar-col { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
 .bar-track { width: 100%; flex: 1 1 auto; display: flex; align-items: flex-end; }
@@ -303,7 +287,6 @@
 }
 .bar-label { font-size: .65rem; color: var(--text-faint); white-space: nowrap; }
 
-/* Lista de risco de infrequencia */
 .risk-item {
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr) auto;
@@ -314,7 +297,6 @@
 .risk-item:last-child { border-bottom: none; }
 .risk-item .risk-pct { font-family: var(--font-display); font-weight: 700; font-size: .875rem; }
 
-/* ---------- Primeiros passos (primeiro acesso) ---------- */
 .setup-list {
   list-style: none;
   margin: 0;
@@ -348,7 +330,6 @@
 .setup-title { font-weight: 600; font-size: .875rem; }
 .setup-desc { font-size: .78125rem; color: var(--text-muted); margin-top: 2px; }
 
-/* Concluida: marcador verde e titulo recuado visualmente */
 .setup-step[data-state="done"] .setup-marker {
   background: var(--present-soft);
   border-color: var(--present-line);
@@ -356,14 +337,12 @@
 }
 .setup-step[data-state="done"] .setup-title { color: var(--text-muted); }
 
-/* Proxima etapa: o unico ponto de atencao da lista */
 .setup-step[data-state="next"] .setup-marker {
   background: var(--accent);
   border-color: transparent;
   color: var(--accent-contrast);
 }
 
-/* Ainda bloqueada por uma dependencia anterior */
 .setup-step[data-state="blocked"] { opacity: .55; }
 
 @media (max-width: 640px) {
@@ -379,7 +358,6 @@
   .setup-step > .btn { grid-area: action; width: 100%; }
 }
 
-/* ---------- Overlay mobile da sidebar ---------- */
 .sidebar-scrim {
   display: none;
   position: fixed; inset: 0; z-index: 39;
@@ -387,7 +365,6 @@
   animation: fade-in var(--dur) var(--ease);
 }
 
-/* ---------- Responsivo ---------- */
 @media (max-width: 1024px) {
   .app-shell { grid-template-columns: 1fr; }
 
@@ -431,7 +408,6 @@
   .page-head .btn { width: 100%; }
 }
 
-/* ---------- Impressao (usado para exportar PDF) ---------- */
 @media print {
   .sidebar, .topbar, .toolbar, .save-bar, .toast-root, .row-actions, .pagination, .no-print { display: none !important; }
   .app-shell { grid-template-columns: 1fr; }
@@ -442,5 +418,4 @@
   @page { margin: 14mm; }
 }
 
-/* Documento gerado para impressao/PDF (injetado em iframe) */
 .print-doc { font-family: var(--font-body); color: #0f172a; }

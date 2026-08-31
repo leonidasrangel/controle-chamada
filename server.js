@@ -1,12 +1,3 @@
-/**
- * Servidor estatico minimalista (zero dependencias).
- *
- * Existe apenas para servir a aplicacao via HTTP, porque modulos ES
- * (`<script type="module">`) sao bloqueados pelo CORS quando abertos
- * diretamente pelo protocolo file://.
- *
- * Uso: `npm start` -> http://localhost:5173
- */
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
@@ -29,7 +20,6 @@ const MIME = {
 
 const server = createServer(async (req, res) => {
   const urlPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-  // normalize + prefixo obrigatorio evitam path traversal (../../etc/passwd)
   const target = normalize(join(ROOT, urlPath === '/' ? '/index.html' : urlPath));
 
   if (!target.startsWith(ROOT)) {
@@ -45,8 +35,6 @@ const server = createServer(async (req, res) => {
     });
     res.end(body);
   } catch {
-    // SPA fallback: rotas desconhecidas devolvem o index (o roteador e por hash,
-    // mas isso mantem o comportamento previsivel se a URL for digitada a mao).
     try {
       const html = await readFile(join(ROOT, 'index.html'));
       res.writeHead(200, { 'Content-Type': MIME['.html'] }).end(html);

@@ -1,10 +1,3 @@
-/**
- * dashboard.js — visao geral com KPIs, serie diaria e alunos em risco.
- *
- * Todos os numeros vem de `core/analytics.js`, nunca de calculos locais, para
- * que dashboard e relatorios contem sempre a mesma historia.
- */
-
 import * as analytics from '../core/analytics.js';
 import * as store from '../core/store.js';
 import { icon } from '../core/icons.js';
@@ -14,14 +7,12 @@ import {
   addDays, formatDate, initials, percent, startOfMonth, todayISO, WEEKDAYS,
 } from '../core/utils.js';
 
-const RISK_THRESHOLD = 25; // % de falta que caracteriza risco de infrequencia
+const RISK_THRESHOLD = 25;
 
 export function renderDashboard(host) {
   const today = todayISO();
   const monthStart = startOfMonth(today);
 
-  // Antes da primeira chamada nao ha o que resumir: os KPIs sairiam todos em
-  // branco. Nesse periodo o dashboard vira um guia de configuracao.
   if (!store.attendanceList().length) {
     renderFirstRun(host, today);
     return;
@@ -57,7 +48,6 @@ export function renderDashboard(host) {
     </div>
   `);
 
-  // Em telas estreitas as duas colunas viram uma so
   applyResponsiveColumns(host);
 
   delegate(host, 'click', '[data-go-attendance]', () => navigate('/chamada'));
@@ -69,15 +59,6 @@ export function renderDashboard(host) {
   });
 }
 
-/* --------------------------------------------------- Primeiro acesso ----- */
-
-/**
- * Define a sequencia de configuracao da escola.
- *
- * A ordem nao e cosmetica: cada etapa depende da anterior (uma turma precisa de
- * disciplinas, um horario precisa de turma com disciplina). Por isso a proxima
- * etapa pendente e destacada e as seguintes ficam apenas listadas.
- */
 function setupSteps() {
   const subjects = store.subjects.list().length;
   const classes = store.classes.list().length;
@@ -232,8 +213,6 @@ function renderStep(step, index, isNext) {
     </li>`;
 }
 
-/* ----------------------------------------------------------------- KPIs -- */
-
 function renderKpis({ day, month, risk }) {
   const cards = [
     {
@@ -281,8 +260,6 @@ function renderKpis({ day, month, risk }) {
     </article>`).join('')}</div>`;
 }
 
-/* -------------------------------------------------------- Serie diaria --- */
-
 function renderTrend(series) {
   const withData = series.filter((point) => point.hasData);
 
@@ -327,8 +304,6 @@ function renderTrend(series) {
     </section>`;
 }
 
-/* ------------------------------------------------------ Alunos em risco -- */
-
 function renderRisk(risk) {
   if (!risk.length) {
     return `
@@ -369,8 +344,6 @@ function renderRisk(risk) {
       </div>
     </section>`;
 }
-
-/* ------------------------------------------------------ Tabela de turmas - */
 
 function renderClassTable(rows) {
   if (!rows.length) {
@@ -436,10 +409,6 @@ function renderClassTable(rows) {
     </section>`;
 }
 
-/**
- * A grade de duas colunas do meio da tela e definida inline (para nao poluir o
- * CSS com um caso unico), entao o ajuste responsivo dela tambem mora aqui.
- */
 function applyResponsiveColumns(host) {
   const grid = host.querySelector('[data-two-col]');
   if (!grid) return;

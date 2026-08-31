@@ -1,20 +1,5 @@
-/**
- * seed.js — massa de dados ficticia.
- *
- * Gera uma escola plausivel (professores, turmas, alunos, grade semanal) e
- * ~10 semanas de historico de chamadas, para que dashboard e relatorios ja
- * abram com numeros reais em vez de telas vazias.
- *
- * O historico e deterministico: um gerador pseudoaleatorio com semente fixa
- * garante que o mesmo dado aparece a cada `reset`, o que torna a demonstracao
- * (e qualquer teste visual) reproduzivel.
- */
-
 import { addDays, normalize, toISODate, weekdayOf } from './utils.js';
 
-/* --------------------------------------------- Aleatoriedade com semente -- */
-
-/** mulberry32: PRNG de 32 bits, curto e com distribuicao boa o bastante aqui. */
 function createRandom(seed = 20240311) {
   let a = seed;
   return () => {
@@ -25,8 +10,6 @@ function createRandom(seed = 20240311) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-
-/* --------------------------------------------------------------- Nomes --- */
 
 const FIRST_NAMES = [
   'Ana', 'Beatriz', 'Bruno', 'Camila', 'Carlos', 'Daniel', 'Eduarda', 'Enzo',
@@ -43,13 +26,10 @@ const LAST_NAMES = [
   'Dias', 'Nunes', 'Moreira', 'Cardoso', 'Teixeira', 'Correia', 'Azevedo',
 ];
 
-/* ---------------------------------------------------------------- Seed --- */
-
 export function buildSeed() {
   const random = createRandom();
   const pick = (list) => list[Math.floor(random() * list.length)];
 
-  /* ---- Disciplinas ---- */
   const subjectNames = [
     'Matematica', 'Portugues', 'Historia', 'Geografia', 'Fisica',
     'Quimica', 'Biologia', 'Ingles', 'Educacao Fisica', 'Filosofia',
@@ -60,7 +40,6 @@ export function buildSeed() {
   }));
   const subjectByName = Object.fromEntries(subjects.map((s) => [s.name, s.id]));
 
-  /* ---- Professores ---- */
   const teacherSeeds = [
     ['Marina Albuquerque', ['Matematica', 'Fisica']],
     ['Ricardo Tavares', ['Portugues', 'Filosofia']],
@@ -79,7 +58,6 @@ export function buildSeed() {
     createdAt: Date.now(),
   }));
 
-  /* ---- Turmas ---- */
   const classSeeds = [
     ['1o Ano A - Ensino Medio', 'tea_02', 'Sala 12', 25, ['Portugues', 'Matematica', 'Historia', 'Ingles', 'Educacao Fisica']],
     ['2o Ano B - Ensino Medio', 'tea_01', 'Sala 07', 28, ['Matematica', 'Fisica', 'Quimica', 'Portugues', 'Geografia']],
@@ -97,12 +75,11 @@ export function buildSeed() {
     createdAt: Date.now(),
   }));
 
-  /* ---- Alunos ---- */
   const students = [];
   const usedNames = new Set();
 
   classes.forEach((schoolClass, classIndex) => {
-    const size = 22 + Math.floor(random() * 7); // 22 a 28 alunos por turma
+    const size = 22 + Math.floor(random() * 7);
 
     for (let roll = 1; roll <= size; roll += 1) {
       let name;
@@ -118,15 +95,13 @@ export function buildSeed() {
         name,
         rollNumber: roll,
         registration: `${2024 + classIndex}${String(1000 + roll)}`,
-        avatar: null, // avatar textual (iniciais) quando nao ha foto
+        avatar: null,
         classIds: [schoolClass.id],
         createdAt: Date.now(),
       });
     }
   });
 
-  /* ---- Grade semanal ---- */
-  // Cada turma recebe de 5 a 8 aulas por semana, em horarios plausiveis.
   const TIME_SLOTS = [
     ['07:30', '09:10'],
     ['09:30', '11:10'],
@@ -136,11 +111,10 @@ export function buildSeed() {
 
   const lessons = [];
   classes.forEach((schoolClass, classIndex) => {
-    // Turmas dos indices pares estudam Seg/Qua/Sex; impares, Ter/Qui + Seg
     const days = classIndex % 2 === 0 ? [1, 3, 5] : [1, 2, 4];
 
     days.forEach((weekday, dayIndex) => {
-      const slotsToday = 1 + (dayIndex % 2); // 1 ou 2 aulas no dia
+      const slotsToday = 1 + (dayIndex % 2);
       for (let s = 0; s < slotsToday; s += 1) {
         const [start, end] = TIME_SLOTS[(dayIndex + s + classIndex) % TIME_SLOTS.length];
         lessons.push({
@@ -155,20 +129,15 @@ export function buildSeed() {
     });
   });
 
-  /* ---- Historico de chamadas ---- */
-  // Percorre os ultimos 70 dias e, sempre que a data cair em um dia letivo da
-  // turma, gera a chamada daquela aula.
   const attendance = [];
   const today = toISODate(new Date());
 
-  // Perfis de frequencia: a maioria dos alunos falta pouco, mas alguns poucos
-  // ficam acima de 25% de falta — e o que alimenta o KPI de infrequencia.
   const absenceRate = new Map(
     students.map((student) => {
       const roll = random();
-      const rate = roll > 0.93 ? 0.30 + random() * 0.18   // ~7% em risco
-        : roll > 0.80 ? 0.12 + random() * 0.10            // ~13% atencao
-          : random() * 0.07;                              // regulares
+      const rate = roll > 0.93 ? 0.30 + random() * 0.18
+        : roll > 0.80 ? 0.12 + random() * 0.10
+          : random() * 0.07;
       return [student.id, rate];
     }),
   );
@@ -198,11 +167,10 @@ export function buildSeed() {
         let status = 'P';
         let note = '';
         if (roll < rate) {
-          // Cerca de um terco das faltas sao justificadas
           status = random() < 0.34 ? 'J' : 'F';
           if (status === 'J') note = NOTES[1];
         } else if (roll < rate + 0.02) {
-          note = NOTES[0]; // presente, mas atrasado
+          note = NOTES[0];
         }
         records[student.id] = { status, note };
       }
@@ -213,7 +181,6 @@ export function buildSeed() {
         classId: lesson.classId,
         subjectId: lesson.subjectId,
         date,
-        // Aulas de mais de duas semanas atras ja estao consolidadas
         locked: offset > 14,
         records,
         createdAt,

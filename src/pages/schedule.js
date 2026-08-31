@@ -1,11 +1,3 @@
-/**
- * schedule.js — dias e horarios de aula (grade semanal por turma).
- *
- * A grade e exibida como colunas de segunda a sabado. Domingo so aparece se a
- * turma tiver alguma aula nele, para nao desperdicar largura com uma coluna
- * quase sempre vazia.
- */
-
 import * as store from '../core/store.js';
 import { icon } from '../core/icons.js';
 import { $, delegate, e, render } from '../core/dom.js';
@@ -90,8 +82,6 @@ export function renderSchedule(host, params) {
   });
 }
 
-/* --------------------------------------------------------------- Grade --- */
-
 function renderWeekSummary(classId) {
   if (!classId) return '';
 
@@ -124,7 +114,6 @@ function renderGrid(host, classId) {
   const lessons = store.lessonsOfClass(classId);
   const today = weekdayOf(todayISO());
 
-  // Segunda a sabado sempre; domingo apenas se houver aula
   const days = WEEKDAYS.filter((day) => day.value !== 0 || lessons.some((l) => l.weekday === 0));
 
   hostNode.innerHTML = `
@@ -169,8 +158,6 @@ function renderSlot(lesson) {
       </div>
     </article>`;
 }
-
-/* ---------------------------------------------------------- Formulario --- */
 
 function openLessonForm(lesson, classId, host, presetWeekday = null) {
   const isEdit = Boolean(lesson);
@@ -229,7 +216,6 @@ function openLessonForm(lesson, classId, host, presetWeekday = null) {
         end: data.end,
       };
 
-      // Duas aulas da mesma turma nao podem ocupar a mesma faixa de horario
       const overlapping = store.lessonsOfClass(classId).find((other) =>
         other.id !== lesson?.id
         && other.weekday === payload.weekday

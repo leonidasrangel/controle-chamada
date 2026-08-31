@@ -1,14 +1,3 @@
-/**
- * reports.js — historico de frequencia com filtros e exportacao.
- *
- * Duas visoes sobre o mesmo recorte de dados:
- *   • "Por aluno"  — consolidado de P/F/J e percentual de cada aluno;
- *   • "Por aula"   — uma linha por chamada registrada, para auditoria.
- *
- * Os filtros ficam na URL, entao um relatorio pode ser salvo nos favoritos ou
- * enviado por e-mail como link e reabre exatamente igual.
- */
-
 import * as analytics from '../core/analytics.js';
 import * as store from '../core/store.js';
 import { icon } from '../core/icons.js';
@@ -58,11 +47,8 @@ export function renderReports(host, params) {
     </div>
   `);
 
-  /* ---- Eventos ---- */
-
   delegate(host, 'change', '[data-filter]', (_event, target) => {
     const key = target.dataset.filter;
-    // Trocar de turma zera o aluno, que pode nao pertencer a nova turma
     setParams(key === 'turma' ? { turma: target.value, aluno: '' } : { [key]: target.value });
   });
 
@@ -77,8 +63,6 @@ export function renderReports(host, params) {
   delegate(host, 'click', '[data-export-csv]', () => exportCSV(view, rows));
   delegate(host, 'click', '[data-export-pdf]', () => exportPDF(view, rows, filters, totals));
 }
-
-/* -------------------------------------------------------------- Filtros -- */
 
 function resolveFilters(params) {
   const today = todayISO();
@@ -177,13 +161,9 @@ function renderTotals(totals, filters) {
     </div>`;
 }
 
-/* ---------------------------------------------------------- Visao aluno -- */
-
 function buildStudentRows(filters) {
   const rows = analytics.perStudent(filters);
   if (!filters.classId) return rows;
-  // Sem filtro de turma o aluno pode aparecer por outra turma; com filtro,
-  // limitamos ao elenco daquela turma para o total bater com a listagem.
   const allowed = new Set(store.studentsOfClass(filters.classId).map((s) => s.id));
   return rows.filter((row) => allowed.has(row.student.id));
 }
@@ -250,8 +230,6 @@ function renderStudentTable(rows) {
       </div>
     </section>`;
 }
-
-/* ----------------------------------------------------------- Visao aula -- */
 
 function buildLessonRows(filters) {
   return store.attendanceList(filters)
@@ -328,9 +306,6 @@ function emptyCard(message) {
     </div></section>`;
 }
 
-/* ----------------------------------------------------------- Exportacao -- */
-
-/** Descreve os filtros ativos em texto, para o cabecalho dos arquivos gerados. */
 function describeFilters(filters) {
   const chips = [`Periodo: ${formatDate(filters.from)} a ${formatDate(filters.to)}`];
 

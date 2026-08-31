@@ -1,20 +1,3 @@
-/**
- * attendance.js — modulo de chamada interativa (funcionalidade central).
- *
- * Fluxo: o professor escolhe turma, disciplina e data no topo; a lista de
- * alunos aparece com os tres botoes de status; ao salvar, os registros vao
- * para o store e a chamada pode ser bloqueada.
- *
- * Duas decisoes que orientam o codigo daqui:
- *
- * 1. Os cliques em P/F/J alteram apenas um rascunho em memoria (`draft`) e
- *    repintam somente a linha afetada. Repintar a lista inteira a cada toque
- *    perderia o foco do teclado e faria a animacao piscar em turmas grandes.
- *
- * 2. Os filtros vivem na URL (`#/chamada?turma=...&data=...`), entao a tela e
- *    recarregavel e compartilhavel, e o botao "voltar" do navegador funciona.
- */
-
 import * as store from '../core/store.js';
 import { icon } from '../core/icons.js';
 import { $, $$, delegate, e, render } from '../core/dom.js';
@@ -26,18 +9,13 @@ import {
   percent, tallyRecords, todayISO, weekdayOf, WEEKDAYS,
 } from '../core/utils.js';
 
-/** Rascunho da chamada aberta: `{ [studentId]: { status, note } }`. */
 let draft = {};
-/** Snapshot do que esta gravado, para detectar alteracoes nao salvas. */
 let savedSnapshot = '';
 let context = { classId: '', subjectId: '', date: todayISO() };
-
-/* --------------------------------------------------------- Renderizacao -- */
 
 export function renderAttendance(host, params) {
   const classes = store.classes.list();
 
-  // Resolve o contexto a partir da URL, caindo para padroes sensatos
   const classId = params.turma && classes.some((c) => c.id === params.turma)
     ? params.turma
     : classes[0]?.id ?? '';
@@ -106,15 +84,6 @@ function renderToolbar(classes, subjects) {
   `;
 }
 
-/**
- * (Re)desenha o painel da chamada.
- *
- * Cada chamada desta funcao monta um painel **novo** e substitui o anterior.
- * Os listeners sao registrados nesse painel descartavel, e nao no host da tela:
- * como `renderRoster` roda de novo a cada gravacao ou bloqueio, ligar os
- * eventos ao host faria os handlers se acumularem — e o handler antigo,
- * segurando um `existing` desatualizado, desfaria o efeito do novo.
- */
 function renderRoster(host) {
   const { classId, subjectId, date } = context;
 
@@ -123,8 +92,6 @@ function renderRoster(host) {
   $('[data-roster-host]', host).replaceChildren(panel);
 
   if (!classId || !subjectId) {
-    // Sem turma e um caso; turma sem disciplina e outro — cada um leva a uma
-    // tela diferente, entao a mensagem precisa distinguir os dois.
     panel.innerHTML = classId
       ? emptyState(
         'book-open',
@@ -154,7 +121,6 @@ function renderRoster(host) {
     return;
   }
 
-  // Aviso (nao bloqueio) quando a data escolhida nao consta na grade da turma
   const weekday = weekdayOf(date);
   const scheduled = store.lessonsOfClass(classId)
     .some((lesson) => lesson.weekday === weekday && lesson.subjectId === subjectId);
@@ -276,12 +242,6 @@ function renderSaveBar(existing) {
   `;
 }
 
-/**
- * Estado vazio com um caminho de saida.
- *
- * @param {{ label: string, path: string, params?: object }} [action]
- *        Botao que leva a tela onde o impedimento e resolvido.
- */
 function emptyState(iconName, title, message, action = null) {
   return `
     <div class="card"><div class="empty">
@@ -296,7 +256,6 @@ function emptyState(iconName, title, message, action = null) {
     </div></div>`;
 }
 
-/** Liga o botao do estado vazio ao roteador. */
 function bindEmptyAction(panel) {
   delegate(panel, 'click', '[data-empty-action]', (_event, target) => {
     const [path, params] = JSON.parse(target.dataset.emptyAction);
@@ -304,13 +263,6 @@ function bindEmptyAction(panel) {
   });
 }
 
-/* -------------------------------------------------------------- Estado --- */
-
-/**
- * Monta o rascunho inicial. Alunos sem registro previo entram como presentes:
- * na pratica a maioria da turma esta presente, entao o professor so precisa
- * marcar as excecoes.
- */
 function buildDraft(roster, existing) {
   const result = {};
   for (const student of roster) {
@@ -327,13 +279,10 @@ function hasUnsavedChanges() {
   return JSON.stringify(draft) !== savedSnapshot && Object.keys(draft).length > 0;
 }
 
-/* -------------------------------------------------------------- Eventos -- */
-
 function bindToolbar(host) {
   delegate(host, 'change', '[data-filter]', (_event, target) => {
     const key = target.dataset.filter;
 
-    // Trocar de turma invalida a disciplina selecionada
     const patch = key === 'turma'
       ? { turma: target.value, disciplina: '' }
       : { [key]: target.value };
@@ -353,7 +302,6 @@ function bindToolbar(host) {
   });
 }
 
-/** Pede confirmacao antes de descartar uma chamada nao gravada. */
 function guardUnsaved(action) {
   if (!hasUnsavedChanges()) {
     action();
@@ -366,22 +314,13 @@ function guardUnsaved(action) {
     tone: 'danger',
     size: 'sm',
     onConfirm: () => {
-      savedSnapshot = JSON.stringify(draft); // evita novo aviso em cascata
+      savedSnapshot = JSON.stringify(draft);
       action();
     },
   });
 }
 
-/**
- * Liga os eventos do painel.
- *
- * @param {HTMLElement} host   raiz da tela, repassada a `renderRoster` quando
- *                             gravar ou bloquear exige redesenhar o painel
- * @param {HTMLElement} panel  painel descartavel desta renderizacao — todos os
- *                             listeners moram aqui e morrem junto com ele
- */
 function bindRoster(host, panel, roster, existing) {
-  /* --- Toque em P / F / J --- */
   delegate(panel, 'click', '.status-btn', (_event, button) => {
     const row = button.closest('.roster-row');
     const studentId = row.dataset.student;
@@ -392,7 +331,6 @@ function bindRoster(host, panel, roster, existing) {
     refreshSummary(panel);
   });
 
-  /* --- Observacao individual --- */
   delegate(panel, 'click', '[data-note]', (_event, button) => {
     const row = button.closest('.roster-row');
     const studentId = row.dataset.student;
@@ -412,13 +350,11 @@ function bindRoster(host, panel, roster, existing) {
         </div>`,
       onConfirm: ({ note }) => {
         draft[studentId] = { ...draft[studentId], note };
-        // Repinta so esta linha para preservar o restante da lista
         row.outerHTML = renderRow(student, existing?.locked);
       },
     });
   });
 
-  /* --- Acoes em lote --- */
   delegate(panel, 'click', '[data-bulk]', (_event, button) => {
     const mode = button.dataset.bulk;
 
@@ -426,7 +362,7 @@ function bindRoster(host, panel, roster, existing) {
       const current = draft[studentId].status;
       const next = mode === 'all-present' ? 'P'
         : mode === 'clear' ? 'P'
-          : current === 'P' ? 'F' : 'P';   // inverter: alterna presente <-> falta
+          : current === 'P' ? 'F' : 'P';
       draft[studentId] = {
         status: next,
         note: mode === 'clear' ? '' : draft[studentId].note,
@@ -444,7 +380,6 @@ function bindRoster(host, panel, roster, existing) {
     refreshSummary(panel);
   });
 
-  /* --- Gravar --- */
   delegate(panel, 'click', '[data-save]', () => {
     const tally = tallyRecords(draft);
     if (!tally.total) {
@@ -459,10 +394,9 @@ function bindRoster(host, panel, roster, existing) {
       'Chamada gravada',
       `${tally.P} presentes, ${tally.F} faltas e ${tally.J} justificadas em ${formatDate(context.date)}.`,
     );
-    renderRoster(host); // reflete o novo estado (badge, data de gravacao, bloqueio)
+    renderRoster(host);
   });
 
-  /* --- Bloquear / desbloquear --- */
   delegate(panel, 'click', '[data-toggle-lock]', () => {
     if (!existing) return;
     store.setAttendanceLock(existing.id, !existing.locked);
@@ -471,7 +405,6 @@ function bindRoster(host, panel, roster, existing) {
   });
 }
 
-/** Atualiza a aparencia de uma linha sem reconstruir o markup inteiro. */
 function paintRow(row, status) {
   row.dataset.status = status;
   for (const button of $$('.status-btn', row)) {

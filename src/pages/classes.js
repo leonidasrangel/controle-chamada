@@ -1,11 +1,3 @@
-/**
- * classes.js — turmas e disciplinas.
- *
- * As duas entidades dividem a mesma tela por abas porque, na pratica, o
- * administrador cadastra disciplinas e turmas na mesma sessao de trabalho:
- * uma turma so existe de forma util depois que suas disciplinas existem.
- */
-
 import * as store from '../core/store.js';
 import { icon } from '../core/icons.js';
 import { $, delegate, e, render } from '../core/dom.js';
@@ -78,8 +70,6 @@ export function renderClasses(host, params) {
   });
 }
 
-/* ------------------------------------------------- Confirmacoes em massa - */
-
 function confirmAllClasses() {
   const total = store.classes.list().length;
   const lessons = store.lessons.list().length;
@@ -115,8 +105,6 @@ function confirmAllSubjects() {
     confirmLabel: `Excluir ${total} disciplina(s)`,
   });
 }
-
-/* ---------------------------------------------------------------- Turmas - */
 
 function buildClassTable() {
   return createTable({
@@ -285,8 +273,6 @@ async function deleteClass(id, table) {
   table.refresh();
 }
 
-/* ----------------------------------------------------------- Disciplinas - */
-
 function buildSubjectTable() {
   return createTable({
     rows: () => store.subjects.list(),
@@ -379,7 +365,6 @@ async function deleteSubject(id, table) {
   });
   if (!ok) return;
 
-  // Desvincula de turmas e professores antes de remover
   for (const schoolClass of usedByClasses) {
     store.classes.update(schoolClass.id, {
       subjectIds: schoolClass.subjectIds.filter((subjectId) => subjectId !== id),

@@ -15,24 +15,19 @@
   <link rel="stylesheet" href="./assets/styles/components.css" />
   <link rel="stylesheet" href="./assets/styles/layout.css" />
 
-  <!--
-    Aplica o tema salvo antes da primeira pintura para evitar "flash" de tela clara
-    em usuarios de dark mode. Precisa ser inline e sincrono.
-  -->
   <script>
     (() => {
       try {
         const saved = localStorage.getItem('cc.theme');
         const theme = saved ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.dataset.theme = theme;
-      } catch { /* localStorage indisponivel (modo privado): mantem o padrao */ }
+      } catch {}
     })();
   </script>
 </head>
 <body>
   <div id="app" class="app-shell"></div>
 
-  <!-- Camadas sobrepostas, fora do fluxo do app para evitar stacking context preso -->
   <div id="modal-root"></div>
   <div id="toast-root" class="toast-root" role="status" aria-live="polite"></div>
 

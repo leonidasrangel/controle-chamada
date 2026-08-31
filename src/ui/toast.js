@@ -1,11 +1,3 @@
-/**
- * toast.js — notificacoes efemeras no canto da tela.
- *
- * A raiz vive em `#toast-root`, que ja e `aria-live="polite"` no HTML, entao
- * leitores de tela anunciam a mensagem sem roubar o foco do professor no meio
- * de uma chamada.
- */
-
 import { icon } from '../core/icons.js';
 import { e, html } from '../core/dom.js';
 
@@ -15,11 +7,6 @@ const ICONS = {
   info: 'info',
 };
 
-/**
- * Exibe um toast.
- * @param {string} title
- * @param {{ description?: string, type?: 'success'|'error'|'info', duration?: number }} [options]
- */
 export function toast(title, { description = '', type = 'success', duration = 3200 } = {}) {
   const root = document.getElementById('toast-root');
   if (!root) return;
@@ -43,7 +30,6 @@ export function toast(title, { description = '', type = 'success', duration = 32
 
   const timer = setTimeout(dismiss, duration);
 
-  // Clicar dispensa imediatamente
   node.addEventListener('click', () => {
     clearTimeout(timer);
     dismiss();

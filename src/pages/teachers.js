@@ -1,12 +1,3 @@
-/**
- * teachers.js — cadastro de professores.
- *
- * Segue o padrao usado por todas as telas de CRUD: uma `createTable` para a
- * listagem e um `openModal` com formulario para criar/editar. A validacao roda
- * dentro do `onConfirm` do modal e devolve `false` para manter o dialogo aberto
- * quando algum campo esta invalido.
- */
-
 import * as store from '../core/store.js';
 import { icon } from '../core/icons.js';
 import { delegate, e, render } from '../core/dom.js';
@@ -109,7 +100,6 @@ export function renderTeachers(host) {
     });
     if (!ok) return;
 
-    // Desvincula das turmas antes de remover, para nao deixar referencia orfa
     for (const schoolClass of linked) store.classes.update(schoolClass.id, { teacherId: '' });
     store.teachers.remove(teacher.id);
     toastSuccess('Professor excluido');
@@ -191,7 +181,6 @@ function openTeacherForm(teacher, table) {
         return invalid(root, 'registration', 'Informe a matricula.');
       }
 
-      // Matricula e a chave de negocio: precisa ser unica
       const duplicate = store.teachers.list().some(
         (item) => item.id !== teacher?.id
           && item.registration?.toLowerCase() === data.registration.toLowerCase(),

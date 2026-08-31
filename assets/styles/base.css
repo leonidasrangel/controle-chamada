@@ -1,10 +1,4 @@
-/* =========================================================================
-   base.css — reset, design tokens, tipografia e temas (light/dark)
-   ========================================================================= */
-
-/* ---------- Design tokens ---------- */
 :root {
-  /* Superficies e texto — escala ardosia (slate) neutra */
   --bg:            #f6f7f9;
   --bg-subtle:     #eef1f5;
   --surface:       #ffffff;
@@ -17,14 +11,12 @@
   --text-muted:    #64748b;
   --text-faint:    #94a3b8;
 
-  /* Acento — indigo */
   --accent:         #4f46e5;
   --accent-hover:   #4338ca;
   --accent-soft:    #eef2ff;
   --accent-contrast:#ffffff;
   --ring:           rgba(79, 70, 229, .35);
 
-  /* Cores semanticas de presenca */
   --present:      #059669;
   --present-soft: #ecfdf5;
   --present-line: #a7f3d0;
@@ -40,7 +32,6 @@
   --info:         #0284c7;
   --info-soft:    #f0f9ff;
 
-  /* Forma e profundidade */
   --radius-sm: 8px;
   --radius:    12px;
   --radius-lg: 16px;
@@ -52,7 +43,6 @@
   --shadow-md: 0 4px 14px rgba(15, 23, 42, .08), 0 2px 4px rgba(15, 23, 42, .04);
   --shadow-lg: 0 18px 48px rgba(15, 23, 42, .16), 0 4px 12px rgba(15, 23, 42, .08);
 
-  /* Movimento — curto e discreto, nunca "elastico" */
   --ease: cubic-bezier(.4, 0, .2, 1);
   --dur-fast: 120ms;
   --dur: 180ms;
@@ -105,7 +95,6 @@
   --shadow-lg: 0 18px 48px rgba(0, 0, 0, .6);
 }
 
-/* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 
 * { margin: 0; }
@@ -120,7 +109,6 @@ body {
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* A troca de tema nao deve "piscar" */
   transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
@@ -144,7 +132,6 @@ h1 { font-size: 1.5rem; }
 h2 { font-size: 1.125rem; }
 h3 { font-size: .975rem; }
 
-/* Foco visivel apenas para navegacao por teclado */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -152,7 +139,6 @@ h3 { font-size: .975rem; }
 }
 :focus:not(:focus-visible) { outline: none; }
 
-/* ---------- Utilitarios ---------- */
 .muted     { color: var(--text-muted); }
 .faint     { color: var(--text-faint); }
 .tiny      { font-size: .75rem; }
@@ -172,14 +158,12 @@ h3 { font-size: .975rem; }
 .grow  { flex: 1 1 auto; min-width: 0; }
 .gap-4 { gap: 4px; } .gap-8 { gap: 8px; } .gap-16 { gap: 16px; } .gap-24 { gap: 24px; }
 
-/* Acessivel para leitores de tela, invisivel na tela */
 .sr-only {
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* Scrollbars discretas */
 * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
 *::-webkit-scrollbar { width: 10px; height: 10px; }
 *::-webkit-scrollbar-thumb {
@@ -190,7 +174,6 @@ h3 { font-size: .975rem; }
 }
 *::-webkit-scrollbar-track { background: transparent; }
 
-/* Respeita quem pediu menos movimento */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;

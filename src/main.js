@@ -1,16 +1,3 @@
-/**
- * main.js — ponto de entrada.
- *
- * Monta o shell (sidebar + topbar + area de conteudo), registra as rotas e
- * liga o roteador.
- *
- * Detalhe importante de arquitetura: cada navegacao cria um **novo** elemento
- * para a area de conteudo. As telas registram seus listeners nesse elemento
- * via delegacao, entao descarta-lo garante que nenhum listener sobreviva a
- * troca de tela — sem isso, voltar cinco vezes para a mesma pagina faria cada
- * clique disparar cinco vezes.
- */
-
 import * as store from './core/store.js';
 import { icon } from './core/icons.js';
 import { $, $$, delegate, downloadFile, render } from './core/dom.js';
@@ -26,8 +13,6 @@ import { renderClasses } from './pages/classes.js';
 import { renderStudents } from './pages/students.js';
 import { renderSchedule } from './pages/schedule.js';
 import { renderReports } from './pages/reports.js';
-
-/* ------------------------------------------------------------ Navegacao -- */
 
 const NAV = [
   {
@@ -49,7 +34,6 @@ const NAV = [
   },
 ];
 
-/** Titulo e subtitulo exibidos na topbar de cada rota. */
 const PAGE_META = {
   '/dashboard': ['Dashboard', 'Visao geral da frequencia escolar'],
   '/chamada': ['Chamada', 'Registro de presenca da aula'],
@@ -59,8 +43,6 @@ const PAGE_META = {
   '/professores': ['Professores', 'Corpo docente'],
   '/horarios': ['Dias e Horarios', 'Grade semanal de aulas'],
 };
-
-/* ---------------------------------------------------------------- Shell -- */
 
 function renderShell() {
   render(document.getElementById('app'), `
@@ -136,7 +118,6 @@ function bindShell() {
     document.body.dataset.nav = '';
   });
 
-  // Em telas estreitas, escolher um item fecha o menu sobreposto
   delegate(app, 'click', '[data-nav]', () => {
     document.body.dataset.nav = '';
   });
@@ -174,12 +155,6 @@ function markActiveNav(path) {
   document.title = `${title} · Controle de Chamada`;
 }
 
-/* --------------------------------------------------------------- Rotas --- */
-
-/**
- * Envolve uma tela: cria um host limpo, chama o renderizador e atualiza os
- * contadores da sidebar (que mudam quando a tela cria ou remove registros).
- */
 function page(renderer) {
   return (params) => {
     const host = document.createElement('div');
@@ -211,8 +186,6 @@ function registerRoutes() {
     delegate(host, 'click', '[data-home]', () => navigate('/dashboard'));
   }));
 }
-
-/* ---------------------------------------------------- Dados e backup ----- */
 
 function openDataManager() {
   const { root } = openModal({
@@ -294,18 +267,10 @@ function openDataManager() {
   });
 }
 
-/**
- * Recarrega a aplicacao apos uma troca completa da base.
- *
- * Um reload e mais seguro do que tentar repintar tudo: filtros guardados na
- * URL podem apontar para turmas e alunos que deixaram de existir.
- */
 function reboot() {
   location.hash = buildHash('/dashboard');
   location.reload();
 }
-
-/* -------------------------------------------------------------- Boot ----- */
 
 function boot() {
   store.loadState();
@@ -315,7 +280,6 @@ function boot() {
   onRouteChange(markActiveNav);
   watchSystemTheme();
 
-  // Mantem os contadores da sidebar em dia mesmo em mudancas feitas por modais
   store.subscribe(refreshCounts);
 
   startRouter('/dashboard');

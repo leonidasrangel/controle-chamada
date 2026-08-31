@@ -1,48 +1,23 @@
-/**
- * export.js — exportacao de relatorios em CSV e PDF.
- *
- * CSV: gerado em memoria e baixado como Blob.
- * PDF: em vez de embutir uma biblioteca de PDF (centenas de KB), montamos um
- *      documento HTML limpo em um iframe oculto e chamamos `print()`. O usuario
- *      escolhe "Salvar como PDF" no dialogo do proprio navegador — mesmo
- *      resultado, zero dependencias.
- */
-
 import { downloadFile, escapeHtml } from './dom.js';
 import { formatDate, normalize } from './utils.js';
 
-/** BOM de UTF-8 (U+FEFF): sem ele o Excel em pt-BR abre o CSV com acentos quebrados. */
 const BOM = '﻿';
 
-/* ----------------------------------------------------------------- CSV --- */
-
-/**
- * Escapa um campo de CSV: aspas duplicadas e envelope quando o valor contem
- * separador, aspas ou quebra de linha.
- */
 function csvCell(value) {
   const text = value == null ? '' : String(value);
   return /[";\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-/**
- * Monta um CSV a partir de cabecalhos e linhas.
- * Usa `;` como separador, que e o esperado por planilhas em locale pt-BR.
- */
 export function toCSV(headers, rows) {
   const lines = [headers.map(csvCell).join(';')];
   for (const row of rows) lines.push(row.map(csvCell).join(';'));
   return BOM + lines.join('\r\n');
 }
 
-/** Gera e baixa um arquivo CSV. */
 export function downloadCSV(filename, headers, rows) {
   downloadFile(filename, toCSV(headers, rows), 'text/csv;charset=utf-8');
 }
 
-/* ----------------------------------------------------------------- PDF --- */
-
-/** Folha de estilo do documento impresso — independente do tema da tela. */
 const PRINT_CSS = `
   @page { size: A4; margin: 14mm; }
   * { box-sizing: border-box; }
@@ -79,24 +54,12 @@ const PRINT_CSS = `
     margin-top: 18px; padding-top: 8px; border-top: 1px solid #e2e8f0;
     font-size: 9px; color: #94a3b8; display: flex; justify-content: space-between;
   }
-  thead { display: table-header-group; }  /* repete o cabecalho a cada pagina */
+  thead { display: table-header-group; }
   tr { break-inside: avoid; }
 `;
 
-/**
- * Abre o dialogo de impressao com um documento montado sob medida.
- *
- * @param {object} options
- * @param {string}   options.title      titulo do relatorio
- * @param {string[]} [options.filters]  chips descrevendo os filtros aplicados
- * @param {Array<{label: string, value: string}>} [options.kpis]
- * @param {string[]} options.headers
- * @param {Array<string[]>} options.rows  celulas ja como markup ou texto simples
- */
 export function printReport({ title, filters = [], kpis = [], headers, rows }) {
   const frame = document.createElement('iframe');
-  // Fora da tela em vez de display:none — alguns navegadores nao imprimem
-  // iframes que nao possuem caixa de layout.
   frame.setAttribute('aria-hidden', 'true');
   Object.assign(frame.style, {
     position: 'fixed', right: '0', bottom: '0',
@@ -138,7 +101,6 @@ export function printReport({ title, filters = [], kpis = [], headers, rows }) {
   doc.write(markup);
   doc.close();
 
-  // Espera o layout do iframe assentar antes de abrir o dialogo de impressao
   frame.contentWindow.addEventListener('load', () => {
     frame.contentWindow.focus();
     frame.contentWindow.print();
@@ -146,14 +108,12 @@ export function printReport({ title, filters = [], kpis = [], headers, rows }) {
   }, { once: true });
 }
 
-/** Celula colorida de status para os relatorios impressos. */
 export function statusTag(status) {
   return status in { P: 1, F: 1, J: 1 }
     ? `<span class="tag tag-${status}">${status}</span>`
     : '—';
 }
 
-/** Nome de arquivo com data, seguro para qualquer sistema de arquivos. */
 export function reportFilename(base, extension) {
   const stamp = formatDate(new Date().toISOString().slice(0, 10)).replace(/\//g, '-');
   const safe = normalize(base).replace(/[^\w-]+/g, '-');

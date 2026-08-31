@@ -1,12 +1,3 @@
-/**
- * students.js — cadastro de alunos.
- *
- * O aluno e a unica entidade com anexo: a foto e lida com `FileReader` e
- * guardada como data URL dentro do proprio registro. Isso mantem tudo em
- * `localStorage` sem servidor de arquivos, ao custo de um limite de tamanho —
- * por isso a imagem e reduzida antes de ser salva (ver `readAvatar`).
- */
-
 import * as store from '../core/store.js';
 import * as analytics from '../core/analytics.js';
 import { icon } from '../core/icons.js';
@@ -17,7 +8,6 @@ import { clearFieldErrors, confirmDialog, invalid, openModal } from '../ui/modal
 import { toastError, toastSuccess } from '../ui/toast.js';
 import { initials, percent } from '../core/utils.js';
 
-/** Lado do quadrado em que a foto e reamostrada antes de virar data URL. */
 const AVATAR_SIZE = 128;
 
 export function renderStudents(host, params) {
@@ -37,8 +27,6 @@ export function renderStudents(host, params) {
     </div>
   `);
 
-  // O alvo da exclusao em massa acompanha o filtro de turma: com um filtro
-  // ativo, "excluir todos" apagando a escola inteira seria uma armadilha.
   const targets = classFilter
     ? store.studentsOfClass(classFilter)
     : store.students.list();
@@ -185,29 +173,22 @@ export function renderStudents(host, params) {
   });
 }
 
-/* -------------------------------------------------------------- Helpers -- */
-
 function avatarMarkup(student, size = '') {
   return student.avatar
     ? `<img class="avatar ${size}" src="${e(student.avatar)}" alt="" loading="lazy" />`
     : `<span class="avatar ${size}" aria-hidden="true">${e(initials(student.name))}</span>`;
 }
 
-/** Taxa de presenca historica do aluno, ou `null` se ele nunca teve chamada. */
 function attendanceRate(studentId) {
   const [row] = analytics.perStudent({ studentId });
   return row ? row.rate : null;
 }
-
-/* ------------------------------------------------------------ Formulario - */
 
 function openStudentForm(student, table, defaultClassId = '') {
   const isEdit = Boolean(student);
   const classes = store.classes.list();
   const selected = new Set(student?.classIds ?? (defaultClassId ? [defaultClassId] : []));
 
-  // Guardado fora do form porque a foto nao e um campo de texto: o input file
-  // so dispara a leitura, e o resultado fica aqui ate o envio.
   let avatar = student?.avatar ?? null;
 
   const modal = openModal({
@@ -276,7 +257,6 @@ function openStudentForm(student, table, defaultClassId = '') {
 
       const rollNumber = Number(data.rollNumber);
 
-      // O numero de chamada precisa ser unico dentro de cada turma
       const conflict = store.students.list().find((other) =>
         other.id !== student?.id
         && other.rollNumber === rollNumber
@@ -305,7 +285,6 @@ function openStudentForm(student, table, defaultClassId = '') {
     },
   });
 
-  /* ---- Foto ---- */
   const root = modal.root;
   const fileInput = $('[data-avatar-input]', root);
 
@@ -342,12 +321,6 @@ function refreshAvatarPreview(root, name, avatar) {
   $('[data-clear-avatar]', root).hidden = !avatar;
 }
 
-/**
- * Le um arquivo de imagem e devolve um data URL quadrado de `AVATAR_SIZE`px.
- *
- * O redimensionamento e essencial: `localStorage` costuma ter apenas ~5 MB, e
- * uma unica foto de celular em base64 passa facilmente de 3 MB.
- */
 function readAvatar(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -361,7 +334,6 @@ function readAvatar(file) {
         canvas.width = AVATAR_SIZE;
         canvas.height = AVATAR_SIZE;
 
-        // Recorte central quadrado, para nao distorcer o rosto
         const side = Math.min(image.width, image.height);
         const sx = (image.width - side) / 2;
         const sy = (image.height - side) / 2;

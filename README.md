@@ -35,12 +35,46 @@ lateral) → **Restaurar dados de demonstração**: 6 professores, 10 disciplina
 
 ---
 
+## Publicando (Vercel)
+
+O projeto é **inteiramente estático**: não há build, dependências nem código de
+servidor. Todos os caminhos são relativos e a aplicação não faz nenhuma chamada
+de rede, então basta servir os arquivos.
+
+O `server.js` **não é usado em produção** — ele existe apenas para o
+desenvolvimento local, onde o protocolo `file://` impediria o carregamento dos
+módulos ES. Qualquer host estático já resolve isso.
+
+A configuração está em `vercel.json`:
+
+| Campo | Valor | Por quê |
+|---|---|---|
+| `framework` | `null` | Não há framework a detectar |
+| `buildCommand` | `null` | Não há etapa de build |
+| `outputDirectory` | `"."` | Os arquivos servidos são a própria raiz |
+| `rewrites` | tudo → `/index.html` | Rede de segurança para URLs digitadas à mão |
+| `headers` | `nosniff`, `Referrer-Policy`, `X-Frame-Options` | Cabeçalhos básicos de segurança |
+
+O *rewrite* é aplicado **depois** da checagem do sistema de arquivos, então
+`/src/main.js` e `/assets/styles/base.css` continuam sendo servidos normalmente;
+só caminhos inexistentes caem no `index.html`. Como o roteamento é por hash
+(`#/chamada`), na prática ele quase nunca é acionado.
+
+> **Atenção aos dados.** A base vive no `localStorage` de cada navegador. Publicar
+> a aplicação não cria um banco compartilhado: cada pessoa que acessar a URL terá
+> a própria base, isolada e vazia no primeiro acesso. Para uma escola de verdade,
+> com dados compartilhados entre professores, seria preciso trocar a camada de
+> persistência por uma API — o que significa reescrever apenas `src/core/store.js`.
+
+---
+
 ## Estrutura de arquivos
 
 ```
 controle-chamada/
 ├── index.html                  # Shell da página e carregamento dos módulos
-├── server.js                   # Servidor estático (zero dependências)
+├── server.js                   # Servidor estático local (não usado em produção)
+├── vercel.json                 # Configuração do deploy estático
 ├── package.json
 │
 ├── assets/styles/

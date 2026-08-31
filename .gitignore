@@ -1,0 +1,26 @@
+# Dependencias (o projeto nao tem nenhuma hoje, mas evita acidentes futuros)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Artefatos gerados em tempo de execucao
+# O PDF sai do dialogo de impressao do navegador e nao faz parte do codigo.
+print.pdf
+*.pdf
+
+# Backups exportados pela propria aplicacao
+controle-chamada-backup*.json
+
+# Configuracao local de ferramentas
+.claude/settings.local.json
+.vscode/
+.idea/
+
+# Sistema operacional
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Especificacao original do projeto, mantida apenas localmente
+prompt.md

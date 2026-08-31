@@ -1,0 +1,14 @@
+{
+  "name": "controle-chamada",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de Controle de Chamada e Gestao Escolar — SPA modular sem dependencias.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

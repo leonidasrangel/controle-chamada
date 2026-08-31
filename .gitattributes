@@ -1,0 +1,12 @@
+# Normaliza as quebras de linha: LF no repositorio, nativo na copia de trabalho.
+# Sem isto, um projeto editado no Windows e aberto no Linux gera diffs de
+# arquivo inteiro so por causa de CRLF.
+* text=auto eol=lf
+
+# Binarios nunca devem ser convertidos
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff2 binary
